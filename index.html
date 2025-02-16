@@ -1,24 +1,122 @@
-<h1 style="text-align: center;"> Tom Lisi</h1>
-<h2 style="text-align: center;"> Reporter | Indoorsman</h2>
-<h2 style="text-align: center;">Contact me </h2>
-<h2 style="text-align: center;">tom(at)tomlisi(dot)com</h2>
-<br></br>
-<form
-  action="https://formspree.io/f/myzkbgly"
-  method="POST"
->
-  <label>
-    Your email:
-    <input type="email" name="email">
-  </label>
-  <label>
-    Your message:
-    <textarea name="message"></textarea>
-  </label>
-  <!-- your other form fields go here -->
-  <button type="submit">Send</button>
-</form>
-<h3 style="text-align: center;">A fair look at what my past three years as a reporter has been like</h3>
-<div class="iframely-embed"><div class="iframely-responsive" style="padding-bottom: 66.5278%; padding-top: 120px; max-width: 200px;"><a href="https://www.washingtonpost.com/opinions/2024/12/18/lancaster-lnp-newspaper-republican-attacks/" data-iframely-url="//iframely.net/hvUFg0Z"></a></div></div><script async src="//iframely.net/embed.js"></script>
-<rssapp-list id="vJLmKd7MRrWAsX04"></rssapp-list><script src="https://widget.rss.app/v1/list.js" type="text/javascript" async></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tom Lisi - Reporter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
 
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .contact-form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .contact-form label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .contact-form button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .contact-form button:hover {
+            background-color: #0056b3;
+        }
+
+        .embed-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+        }
+
+        .iframely-embed {
+            max-width: 600px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Tom Lisi</h1>
+        <h2>Reporter | Indoorsman</h2>
+
+        <!-- Contact Form -->
+        <div class="contact-form">
+            <h2>Contact Me</h2>
+            <form action="https://formspree.io/f/myzkbgly" method="POST">
+                <label for="email">Your Email:</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="message">What's up?</label>
+                <textarea id="message" name="message" rows="2" required></textarea>
+
+                <button type="submit">Send</button>
+            </form>
+        </div>
+
+        <!-- Article Embed -->
+        <h3>A fair look at what my past three years as a reporter has been like</h3>
+        <div class="embed-container">
+            <div class="iframely-embed">
+                <div class="iframely-responsive" style="height: 140px; padding-bottom: 0;">
+                    <a href="https://www.washingtonpost.com/opinions/2024/12/18/lancaster-lnp-newspaper-republican-attacks/"
+                       data-iframely-url="//iframely.net/hvUFg0Z?card=small"></a>
+                </div>
+            </div>
+        </div>
+        <script async src="//iframely.net/embed.js"></script>
+
+        <!-- RSS Feed -->
+        <div class="embed-container">
+            <rssapp-list id="vJLmKd7MRrWAsX04"></rssapp-list>
+            <script src="https://widget.rss.app/v1/list.js" type="text/javascript" async></script>
+        </div>
+    </div>
+
+</body>
+</html>
