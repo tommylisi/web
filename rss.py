@@ -1,128 +1,96 @@
 import requests
 from bs4 import BeautifulSoup
 from feedgen.feed import FeedGenerator
-from datetime import datetime
+from dateutil import parser
 
-# URL of Tom Lisi's articles page
 URL = "https://lancasteronline.com/staff/tomlisi/"
 
 def fetch_articles():
-    """Scrape Tom Lisi's latest articles from LancasterOnline."""
+    """Scrapes articles and extracts relevant details."""
     response = requests.get(URL)
     if response.status_code != 200:
-        print("Failed to fetch the page.")
+        print("Failed to retrieve page")
         return []
     
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = BeautifulSoup(response.text, "html.parser")
     articles = []
-
     for article in soup.select("article.tnt-asset-type-article"):
-        title_tag = article.select_one("h3.tnt-headline a")
-        link = title_tag["href"] if title_tag else None
-        full_link = f"https://lancasteronline.com{link}" if link else None
-
-        date_tag = article.select_one("time")
-        pub_date = date_tag["datetime"] if date_tag else None
+        title_tag = article.select_one(".tnt-headline")
+        link_tag = article.select_one(".image a")
+        link = link_tag["href"] if link_tag else None
+        title = title_tag.get_text(strip=True) if title_tag else "No Title"
 
         summary_tag = article.select_one("p.tnt-summary")
-        summary = summary_tag.text.strip() if summary_tag else "No summary available."
+        description = summary_tag.get_text(strip=True) if summary_tag else ""
 
-        # Get the image URL (largest one)
-        image_tag = article.select_one("img.img-responsive")
+        # Extract the largest image from data-srcset
+        image_tag = article.select_one("div.img")
+        image_url = None
         if image_tag:
-            image_srcset = image_tag.get("data-srcset", "").split(", ")
-            if image_srcset:
-                largest_image_url = image_srcset[-1].split(" ")[0]
-            else:
-                largest_image_url = image_tag.get("src")  
-        else:
-            largest_image_url = None
+            if "data-srcset" in image_tag.attrs:
+                srcset = image_tag["data-srcset"].split(", ")
+                largest_image = srcset[-1].split(" ")[0]  # Last entry in srcset should be the largest
+                image_url = largest_image
+            elif "src" in image_tag.attrs:
+                image_url = image_tag["src"]  # Fallback to `src`
 
-        # Convert date to sortable format
-        pub_date_parsed = datetime.strptime(pub_date, "%Y-%m-%dT%H:%M:%S%z") if pub_date else None
 
-        if title_tag and full_link and pub_date_parsed:
-            articles.append({
-                "title": title_tag.text.strip(),
-                "link": full_link,
-                "pub_date": pub_date,  # Keep original string for RSS
-                "pub_date_parsed": pub_date_parsed,  # Parsed for sorting
-                "summary": summary,
-                "image": largest_image_url
-            })
+        # Ensure full URL for links
+        if link and not link.startswith("http"):
+            link = "https://lancasteronline.com" + link  
 
-    # Sort articles by date in descending order
-    articles.sort(key=lambda x: x["pub_date_parsed"], reverse=True)
-
-    return articles
-
-    
-    soup = BeautifulSoup(response.text, 'html.parser')
-    articles = []
-
-    # Find article elements
-    for article in soup.select("article.tnt-asset-type-article"):
-        title_tag = article.select_one("h3.tnt-headline a")
-        link = title_tag["href"] if title_tag else None
-        full_link = f"https://lancasteronline.com{link}" if link else None
-
+        # Extract and validate date
         date_tag = article.select_one("time")
-        pub_date = date_tag["datetime"] if date_tag else None
+        pub_date = None
+        if date_tag and "datetime" in date_tag.attrs:
+            try:
+                pub_date = parser.parse(date_tag["datetime"]).strftime("%a, %d %b %Y %H:%M:%S %z")
+            except Exception as e:
+                print(f"Invalid date format: {date_tag['datetime']} - Error: {e}")
 
-        summary_tag = article.select_one("p.tnt-summary")
-        summary = summary_tag.text.strip() if summary_tag else "No summary available."
 
-        # Get the image URL (largest one)
-        image_tag = article.select_one("img.img-responsive")
-        if image_tag:
-            image_srcset = image_tag.get("data-srcset", "").split(", ")
-            if image_srcset:
-                # Get the last (largest) image in the srcset
-                largest_image_url = image_srcset[-1].split(" ")[0]
-            else:
-                largest_image_url = image_tag.get("src")  # Fallback to standard src
-        else:
-            largest_image_url = None
-
-        # Store article data, including the largest image
-        if title_tag and full_link and pub_date:
-            articles.append({
-                "title": title_tag.text.strip(),
-                "link": full_link,
-                "pub_date": pub_date,
-                "summary": summary,
-                "image": largest_image_url  # Using the largest image URL
-            })
-
-    return articles
-
+        articles.append({
+            "title": title,
+            "link": link,
+            "description": description,
+            "image": image_url,
+            "pub_date": pub_date
+        })
+    return list(reversed(articles))
 def generate_rss(articles):
-    """Generate an RSS feed from scraped articles."""
+    """Generates an RSS feed."""
     fg = FeedGenerator()
-    fg.title("Tom Lisi - LancasterOnline RSS")
+    fg.title("Tom Lisi's Articles - LancasterOnline")
     fg.link(href=URL, rel="self")
-    fg.description("Latest articles by Tom Lisi from LancasterOnline")
+    fg.description("Latest articles from journalist Tom Lisi on LancasterOnline")
 
     for article in articles:
         fe = fg.add_entry()
         fe.title(article["title"])
         fe.link(href=article["link"])
-        fe.published(article["pub_date"])
-        fe.description(article["summary"])
+        fe.description(article["description"])
+        if article["pub_date"]:
+            try:
+                fe.pubDate(article["pub_date"])
+            except Exception as e:
+                print(f"Error setting pubDate for {article['title']}: {e}")
+        fe.enclosure(article["image"], 0, "image/jpeg")  # Adding large image
 
-        # Add the image URL to the RSS feed entry
-        if article["image"]:
-            fe.enclosure(article["image"], 0, "image/jpeg")  # Add image to RSS feed
+    return fg.rss_str(pretty=True)
 
-    # Save the RSS feed
+def save_rss_feed():
+    """Fetches articles and saves the RSS feed."""
+    articles = fetch_articles()
+    if not articles:
+        print("No articles found.")
+        return
+
+    rss_feed = generate_rss(articles)
+
     with open("tom_lisi_feed.xml", "wb") as f:
-        f.write(fg.rss_str(pretty=True))
-
-    print("RSS feed generated: tom_lisi_feed.xml")
+        f.write(rss_feed)
+    
+    print("RSS feed saved as tom_lisi_feed.xml")
 
 if __name__ == "__main__":
-    articles = fetch_articles()
-    if articles:
-        generate_rss(articles)
-    else:
-        print("No articles found.")
+    save_rss_feed()
