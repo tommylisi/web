@@ -27,16 +27,26 @@ def fetch_articles():
         summary_tag = article.select_one("p.tnt-summary")
         summary = summary_tag.text.strip() if summary_tag else "No summary available."
 
-        image_tag = article.select_one("div.image img")
-        image_url = image_tag["data-srcset"].split()[0] if image_tag and "data-srcset" in image_tag.attrs else None
+        # Get the image URL (largest one)
+        image_tag = article.select_one("img.img-responsive")
+        if image_tag:
+            image_srcset = image_tag.get("data-srcset", "").split(", ")
+            if image_srcset:
+                # Get the last (largest) image in the srcset
+                largest_image_url = image_srcset[-1].split(" ")[0]
+            else:
+                largest_image_url = image_tag.get("src")  # Fallback to standard src
+        else:
+            largest_image_url = None
 
+        # Store article data, including the largest image
         if title_tag and full_link and pub_date:
             articles.append({
                 "title": title_tag.text.strip(),
                 "link": full_link,
                 "pub_date": pub_date,
                 "summary": summary,
-                "image": image_url
+                "image": largest_image_url  # Using the largest image URL
             })
 
     return articles
@@ -54,6 +64,8 @@ def generate_rss(articles):
         fe.link(href=article["link"])
         fe.published(article["pub_date"])
         fe.description(article["summary"])
+
+        # Add the image URL to the RSS feed entry
         if article["image"]:
             fe.enclosure(article["image"], 0, "image/jpeg")  # Add image to RSS feed
 

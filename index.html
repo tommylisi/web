@@ -4,90 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tom Lisi - Reporter</title>
-    <style>
-        body {
-            font-family: "Lucida Console", "Courier New", monospace;
-            background-color: #cbdfc8;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            max-width: 800px;
-            width: 100%;
-            text-align: center;
-        }
-
-        h1, h2, h3 {
-            color: #1a4e30;
-            margin-bottom: 10px;
-        }
-
-        .contact-form {
-            color: #d6e0da
-            background: rgb(79, 105, 83);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.912);
-            max-width: 400px;
-            margin: 20px auto;
-            text-align: center;
-        
-        }
-
-        .contact-form label {
-            display: block;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
-        .contact-form input,
-        .contact-form textarea {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            font-size: 20px;
-        }
-
-        .contact-form button {
-            background-color: #543d6b;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .contact-form button:hover {
-            background-color: #413146;
-        }
-
-        .embed-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px auto;
-        }
-
-        .iframely-embed {
-            max-width: 600px;
-            width: 100%;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
         <h1>Tom Lisi</h1>
-        <h2>Reporter | Great Indoorsman</h2>
+        <h1>Reporter</h1>
+    </div>
+    <div class="rss">
+            <h1>My Latest Work</h1>
+            <div id="rss-feed" class="rss-feed">Loading feed...</div>
+        
+            <script>
+                async function fetchRSSFromGitHub() {
+                    const githubRawUrl = "https://raw.githubusercontent.com/tommylisi/web/main/tom_lisi_feed.xml";
+        
+                    try {
+                        const response = await fetch(githubRawUrl);
+                        if (!response.ok) throw new Error("Network response was not ok");
+                        
+                        const text = await response.text();
+                        const parser = new DOMParser();
+                        const xml = parser.parseFromString(text, "text/xml");
+        
+                        const items = xml.querySelectorAll("item");
+                        let html = "";
+        
+                        items.forEach((item, index) => {
+                            if (index < 5) { // Limit to 5 articles
+                                const title = item.querySelector("title").textContent;
+                                const link = item.querySelector("link").textContent;
+                                const description = item.querySelector("description").textContent;
+                                const pubDate = new Date(item.querySelector("pubDate").textContent).toDateString();
+                                 // Get image from <enclosure> tag if available
+                                    const mediaContent = item.querySelector("media\\:content, content");
+                                    const enclosure = item.querySelector("enclosure");
 
-        <!-- Contact Form -->
+                                    const imageUrl = mediaContent 
+                                    ? mediaContent.getAttribute("url") 
+                                    : enclosure 
+                                        ? enclosure.getAttribute("url") 
+                                        : "default-image.jpg"; // Fallback image
+        
+                                html += `
+                                    <div class="rss-item">
+                                        <img src="${imageUrl}" alt="${title}" class="rss-image" style="width:100%; border-radius: 8px;">
+                                        <h2 class="rss-title"><a href="${link}" target="_blank">${title}</a></h2>
+                                        <p class="rss-description">${description}</p>
+                                        <span class="rss-date">${pubDate}</span>
+                                    </div>
+                                `;
+                            }
+                        });
+        
+                        document.getElementById("rss-feed").innerHTML = html;
+                    } catch (error) {
+                        console.error("Error fetching RSS feed:", error);
+                        document.getElementById("rss-feed").innerHTML = "Failed to load feed.";
+                    }
+                }
+        
+                // Fetch RSS feed from GitHub and refresh every 60 seconds
+                fetchRSSFromGitHub();
+                setInterval(fetchRSSFromGitHub, 60000);
+            </script>
+    </div>
         <div class="contact-form">
             <h2>Contact Me</h2>
             <form action="https://formspree.io/f/myzkbgly" method="POST">
@@ -100,11 +82,8 @@
                 <button type="submit">Send</button>
             </form>
         </div>
-
-        <!-- Article Embed -->
-        <!-- Elfsight RSS Feed | Untitled RSS Feed -->
-<script src="https://static.elfsight.com/platform/platform.js" async></script>
-<div class="elfsight-app-8598c404-e99f-4024-b10f-f05d644d51e2" data-elfsight-app-lazy></div>
-
+        </body>
+        </html>
+        
 </body>
 </html>

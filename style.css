@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+body {
+    display: flex;
+    flex-direction: column;
+    background-color: #cbdfc8aa;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    background-color: #1a4e30ae;
+    justify-content: space-between;
+    font-family: 'Poppins', sans-serif;
+    color: rgba(250, 253, 250, 0.926);
+    padding: 5px 15px 5px 15px;
+}
+
+
+.contact-form {
+    color: #d6e0da
+    background-color: rrb(79, 105, 83);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.912);
+    max-width: 400px;
+    margin: 20px auto;
+    text-align: center;
+
+}
+
+.contact-form label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 20px;
+}
+
+.contact-form button {
+    background-color: #543d6b;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.contact-form button:hover {
+    background-color: #413146;
+}
+
+.embed-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+}
+
+.rss-feed {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.rss-item {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+.rss-title {
+    font-size: 1.5rem;
+}
+.rss-title a {
+    text-decoration: none;
+    color: #333;
+}
+.rss-description {
+    font-size: 1rem;
+    color: #555;
+}
+.rss-date {
+    font-size: 0.85rem;
+    color: #888;
+}
