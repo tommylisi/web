@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from feedgen.feed import FeedGenerator
+from datetime import datetime
 
 # URL of Tom Lisi's articles page
 URL = "https://lancasteronline.com/staff/tomlisi/"
@@ -11,6 +12,50 @@ def fetch_articles():
     if response.status_code != 200:
         print("Failed to fetch the page.")
         return []
+    
+    soup = BeautifulSoup(response.text, 'html.parser')
+    articles = []
+
+    for article in soup.select("article.tnt-asset-type-article"):
+        title_tag = article.select_one("h3.tnt-headline a")
+        link = title_tag["href"] if title_tag else None
+        full_link = f"https://lancasteronline.com{link}" if link else None
+
+        date_tag = article.select_one("time")
+        pub_date = date_tag["datetime"] if date_tag else None
+
+        summary_tag = article.select_one("p.tnt-summary")
+        summary = summary_tag.text.strip() if summary_tag else "No summary available."
+
+        # Get the image URL (largest one)
+        image_tag = article.select_one("img.img-responsive")
+        if image_tag:
+            image_srcset = image_tag.get("data-srcset", "").split(", ")
+            if image_srcset:
+                largest_image_url = image_srcset[-1].split(" ")[0]
+            else:
+                largest_image_url = image_tag.get("src")  
+        else:
+            largest_image_url = None
+
+        # Convert date to sortable format
+        pub_date_parsed = datetime.strptime(pub_date, "%Y-%m-%dT%H:%M:%S%z") if pub_date else None
+
+        if title_tag and full_link and pub_date_parsed:
+            articles.append({
+                "title": title_tag.text.strip(),
+                "link": full_link,
+                "pub_date": pub_date,  # Keep original string for RSS
+                "pub_date_parsed": pub_date_parsed,  # Parsed for sorting
+                "summary": summary,
+                "image": largest_image_url
+            })
+
+    # Sort articles by date in descending order
+    articles.sort(key=lambda x: x["pub_date_parsed"], reverse=True)
+
+    return articles
+
     
     soup = BeautifulSoup(response.text, 'html.parser')
     articles = []

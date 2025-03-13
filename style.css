@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
 body {
     display: flex;
@@ -7,17 +7,70 @@ body {
     display: flex;
     justify-content: center;
     margin: 0;
+    font-family: 'Roboto', sans-serif;
+
 }
 
-.container {
+.header {
     display: flex;
     background-color: #1a4e30ae;
     justify-content: space-between;
-    font-family: 'Poppins', sans-serif;
     color: rgba(250, 253, 250, 0.926);
     padding: 5px 15px 5px 15px;
 }
 
+
+
+.rss {
+    display: flex;
+    flex-direction: column;
+    background-color: #cbdfc8aa;
+    color: #1a4e30ae;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px solid #1a4e30ae;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.rss h1{
+    display: flex;
+    justify-content: center;
+    background-color: #1a4e30ae;
+    color: rgba(250, 253, 250, 0.926);
+    border-radius: 5;
+    padding: 10px;
+}
+
+.rss a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.rss a:hover {
+    color: rgb(200, 234, 208);
+}
+
+.rss-item {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+.rss-title {
+    font-size: 1.5rem;
+}
+.rss-title a {
+    text-decoration: none;
+    color: #333;
+}
+.rss-description {
+    font-size: 1rem;
+    color: #555;
+}
+.rss-date {
+    font-size: 0.85rem;
+    color: #888;
+}
 
 .contact-form {
     color: #d6e0da
@@ -67,32 +120,4 @@ body {
     justify-content: center;
     align-items: center;
     margin: 20px auto;
-}
-
-.rss-feed {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    background: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-.rss-item {
-    padding: 15px;
-    border-bottom: 1px solid #ddd;
-}
-.rss-title {
-    font-size: 1.5rem;
-}
-.rss-title a {
-    text-decoration: none;
-    color: #333;
-}
-.rss-description {
-    font-size: 1rem;
-    color: #555;
-}
-.rss-date {
-    font-size: 0.85rem;
-    color: #888;
 }
