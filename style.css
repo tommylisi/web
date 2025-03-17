@@ -19,7 +19,67 @@ body {
     padding: 5px 15px 5px 15px;
 }
 
+.header-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 100px;
+}
 
+.header-right a{
+    text-decoration: none;
+    color: inherit;
+}
+.news-header {
+    display: flex;
+    justify-content: center;
+    color: #1a4e30ae;
+}
+
+.news-container {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    overflow: hidden;
+    gap: 20px;
+    margin: 20px;
+    justify-content: center;
+}
+.card {
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    max-width: 400px;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.card img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+.card-content {
+    padding: 15px;
+}
+.card-title {
+    font-size: 1.2em;
+    margin: 0 0 10px;
+    color: #333;
+}
+.card-description {
+    font-size: 0.9em;
+    color: #666;
+}
+.card-link {
+    display: flex;
+    text-decoration: none;
+    color: inherit;
+
+}
 
 .rss {
     display: flex;
@@ -34,6 +94,9 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.rss:hover {
+    transform: translateY(-5px);
+}
 .rss h1{
     display: flex;
     justify-content: center;
@@ -49,7 +112,7 @@ body {
 }
 
 .rss a:hover {
-    color: rgb(200, 234, 208);
+    color: rgb(24, 106, 43);
 }
 
 .rss-item {
@@ -120,4 +183,11 @@ body {
     justify-content: center;
     align-items: center;
     margin: 20px auto;
+}
+
+.footer {
+    display: flex;
+    background-color: #1a4e30ae;
+    color: rgba(250, 253, 250, 0.926);
+    padding: 5px 15px 5px 15px;
 }

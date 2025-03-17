@@ -1,3 +1,4 @@
+import re
 import requests
 from bs4 import BeautifulSoup
 from feedgen.feed import FeedGenerator
@@ -14,7 +15,7 @@ def fetch_articles():
     
     soup = BeautifulSoup(response.text, "html.parser")
     articles = []
-    for article in soup.select("article.tnt-asset-type-article"):
+    for article in soup.select(".card-infinite card-img-sm"):
         title_tag = article.select_one(".tnt-headline")
         link_tag = article.select_one(".image a")
         link = link_tag["href"] if link_tag else None
@@ -24,15 +25,14 @@ def fetch_articles():
         description = summary_tag.get_text(strip=True) if summary_tag else ""
 
         # Extract the largest image from data-srcset
-        image_tag = article.select_one("div.img")
-        image_url = None
-        if image_tag:
-            if "data-srcset" in image_tag.attrs:
-                srcset = image_tag["data-srcset"].split(", ")
-                largest_image = srcset[-1].split(" ")[0]  # Last entry in srcset should be the largest
-                image_url = largest_image
-            elif "src" in image_tag.attrs:
-                image_url = image_tag["src"]  # Fallback to `src`
+        image_tag = article.select_one("img")
+        if image_tag and "data-srcset" in image_tag.attrs:
+            srcset = image_tag["data-srcset"]
+    
+    # Use regex to find only 200w and 225w images
+        matches = re.findall(r'(https:[^\s]+resize=200%2C113[^\s]+) 200w|'
+                         r'(https:[^\s]+resize=225%2C127[^\s]+) 225w', srcset)
+        image_url = [match for group in matches for match in group if match]
 
 
         # Ensure full URL for links
@@ -56,7 +56,8 @@ def fetch_articles():
             "image": image_url,
             "pub_date": pub_date
         })
-    return list(reversed(articles))
+
+    return articles
 def generate_rss(articles):
     """Generates an RSS feed."""
     fg = FeedGenerator()
