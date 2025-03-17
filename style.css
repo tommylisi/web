@@ -19,6 +19,11 @@ body {
     padding: 5px 15px 5px 15px;
 }
 
+.header-right a{
+    text-decoration: none;
+    color: inherit;
+}
+
 .header-right {
     display: flex;
     flex-direction: row;
@@ -27,10 +32,6 @@ body {
     gap: 100px;
 }
 
-.header-right a{
-    text-decoration: none;
-    color: inherit;
-}
 .news-header {
     display: flex;
     justify-content: center;
