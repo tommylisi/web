@@ -108,7 +108,6 @@ body {
 
 .contact-form input,
 .contact-form textarea {
-    width: 100%;
     padding: 8px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
