@@ -85,64 +85,8 @@
         </a>
     </div>
 
-    <div class="rss">
-            <h1>My Latest Work at&nbsp;<a href="https://lancasteronline.com/" target="_blank" rel="noopener noreferrer">LNP | LancasterOnline</a></h1>
-            <div id="rss-feed" class="rss-feed">Loading feed...</div>
-        
-            <script>
-                async function fetchRSSFromGitHub() {
-                    const githubRawUrl = "https://raw.githubusercontent.com/tommylisi/web/main/tom_lisi_feed.xml";
-        
-                    try {
-                        const response = await fetch(githubRawUrl);
-                        if (!response.ok) throw new Error("Network response was not ok");
-                        
-                        const text = await response.text();
-                        const parser = new DOMParser();
-                        const xml = parser.parseFromString(text, "text/xml");
-        
-                        const items = xml.querySelectorAll("item");
-                        let html = "";
-        
-                        items.forEach((item, index) => {
-                            if (index < 5) { // Limit to 5 articles
-                                const title = item.querySelector("title").textContent;
-                                const link = item.querySelector("link").textContent;
-                                const description = item.querySelector("description").textContent;
-                                const pubDate = new Date(item.querySelector("pubDate").textContent).toDateString();
-                                 // Get image from <enclosure> tag if available
-                                    const mediaContent = item.querySelector("media\\:content, content");
-                                    const enclosure = item.querySelector("enclosure");
-
-                                    const imageUrl = mediaContent 
-                                    ? mediaContent.getAttribute("url") 
-                                    : enclosure 
-                                        ? enclosure.getAttribute("url") 
-                                        : "default-image.jpg"; // Fallback image
-        
-                                html += `
-                                    <div class="rss-item">
-                                        <img src="${imageUrl}" alt="${title}" class="rss-image" style="width:100%; border-radius: 8px;">
-                                        <h2 class="rss-title"><a href="${link}" target="_blank">${title}</a></h2>
-                                        <p class="rss-description">${description}</p>
-                                        <span class="rss-date">${pubDate}</span>
-                                    </div>
-                                `;
-                            }
-                        });
-        
-                        document.getElementById("rss-feed").innerHTML = html;
-                    } catch (error) {
-                        console.error("Error fetching RSS feed:", error);
-                        document.getElementById("rss-feed").innerHTML = "Failed to load feed.";
-                    }
-                }
-        
-                // Fetch RSS feed from GitHub and refresh every 60 seconds
-                fetchRSSFromGitHub();
-                setInterval(fetchRSSFromGitHub, 60000);
-            </script>
-    </div>
+   <script src="https://cdn.commoninja.com/sdk/latest/commonninja.js" defer></script>
+<div class="commonninja_component pid-d1a6e558-e528-4166-8c88-e737845c93b7"></div>
         <div class="contact-form" id="contact-link">
             <h2>Contact Me</h2>
             <form action="https://formspree.io/f/myzkbgly" method="POST">
