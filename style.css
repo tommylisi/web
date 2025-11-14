@@ -83,7 +83,7 @@ body {
 }
 
 .feed {
-    padding: 200px;
+    max-width: 200px; 
 }
 
 .contact-form {
