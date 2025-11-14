@@ -1,128 +1,132 @@
-import re
 import requests
-from bs4 import BeautifulSoup
-from feedgen.feed import FeedGenerator
+import feedgen.feed
 from dateutil import parser
-from datetime import datetime
 import pytz
+import json
+import re
+import time 
+import random # <--- ESSENTIAL: Added for 429 Error Fix
 
 URL = "https://lancasteronline.com/staff/tomlisi/"
+JSON_API_URL = "https://lancasteronline.com/search/?l=20&a=Tom%20Lisi&f=json"
+# <--- ESSENTIAL: Added for 429 Error Fix
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'application/json, text/plain, */*',
+    'Referer': 'https://lancasteronline.com/staff/tomlisi/',
+}
 
 def fetch_articles():
-    """Scrapes articles and extracts relevant details."""
-    response = requests.get(URL)
-    if response.status_code != 200:
-        print("Failed to retrieve page")
-        return []
+    """Fetches articles directly from the site's JSON API endpoint with headers and retry logic."""
     
-    soup = BeautifulSoup(response.text, "html.parser")
-    articles = []
-    
-    # CORRECTED SELECTOR: Target the parent element containing article details
-    # The articles are within a simple .tnt-asset class on this page
-    for article in soup.select("article.tnt-asset"):
+    max_retries = 3
+    for attempt in range(max_retries):
+        print(f"Requesting JSON data from: {JSON_API_URL} (Attempt {attempt + 1}/{max_retries})")
         
-        # --- TITLE and LINK ---
-        title_tag = article.select_one(".tnt-headline a")
-        link_tag = article.select_one(".tnt-headline a")
+        # 1. Request the JSON API URL with HEADERS
+        response = requests.get(JSON_API_URL, headers=HEADERS) # <--- ESSENTIAL: Use HEADERS
         
-        link = link_tag["href"] if link_tag else None
-        title = title_tag.get_text(strip=True) if title_tag else "No Title"
-
-        # Ensure full URL for links
-        if link and not link.startswith("http"):
-            link = "https://lancasteronline.com" + link
-
-        # --- DESCRIPTION ---
-        summary_tag = article.select_one(".tnt-summary")
-        description = summary_tag.get_text(strip=True) if summary_tag else ""
-
-        # --- PUBLICATION DATE ---
-        date_tag = article.select_one("time")
-        pub_date = None
-        if date_tag and "datetime" in date_tag.attrs:
+        if response.status_code == 200:
+            # Success! Proceed to parse
             try:
-                # The datetime attribute is often ISO 8601, parse it, and then localize/format
-                dt_obj = parser.parse(date_tag["datetime"])
-                # Assume ET timezone (Lancaster, PA) if not specified
-                if dt_obj.tzinfo is None or dt_obj.tzinfo.utcoffset(dt_obj) is None:
-                    est = pytz.timezone('America/New_York')
-                    dt_obj = est.localize(dt_obj)
+                data = response.json()
+            except json.JSONDecodeError:
+                print("Failed to decode JSON response.")
+                return []
+
+            articles = []
+            results = data.get('results', [])
+            
+            if not results:
+                print("JSON API returned no article results.")
+                return []
+
+            # 2. Loop through the JSON results (Your parsing logic)
+            for item in results:
+                title = item.get('title')
+                link = item.get('url')
+                description = item.get('summary', '')
+                date_string = item.get('display_time', item.get('publish_time'))
                 
-                # Format for RSS
-                pub_date = dt_obj.strftime("%a, %d %b %Y %H:%M:%S %z")
-            except Exception as e:
-                print(f"Invalid date format: {date_tag['datetime']} - Error: {e}")
+                if link and not link.startswith("http"):
+                    link = "https://lancasteronline.com" + link
 
-        # --- IMAGE ---
-        # Look for the image tag within the article
-        image_url = []
-        image_tag = article.select_one(".tnt-image img")
-        
-        if image_tag and "data-srcset" in image_tag.attrs:
-            srcset = image_tag["data-srcset"]
-            
-            # Simplified regex: find the last (largest) valid URL in the srcset
-            # This is often the best practice unless you specifically need small sizes
-            matches = re.findall(r'(https://[^\s,]+)', srcset)
-            
-            # Get the URL associated with the highest resolution/width (usually the last match)
-            if matches:
-                image_url.append(matches[-1]) 
-            
-        
-        articles.append({
-            "title": title,
-            "link": link,
-            "description": description,
-            "image": image_url[0] if image_url else None, # Pass a single URL or None
-            "pub_date": pub_date
-        })
+                pub_date = None
+                if date_string:
+                    try:
+                        dt_obj = parser.parse(date_string)
+                        if dt_obj.tzinfo is None or dt_obj.tzinfo.utcoffset(dt_obj) is None:
+                            est = pytz.timezone('America/New_York')
+                            dt_obj = est.localize(dt_obj).astimezone(pytz.utc) 
+                        pub_date = dt_obj.strftime("%a, %d %b %Y %H:%M:%S +0000")
+                    except Exception as e:
+                        print(f"Invalid date format in JSON: {date_string} - Error: {e}")
 
-    return articles
+                image_url = None
+                primary_image = item.get('image', {})
+                if primary_image:
+                    image_url = primary_image.get('url')
+                
+                if not all([title, link]):
+                    continue
+                    
+                articles.append({
+                    "title": title,
+                    "link": link,
+                    "description": description,
+                    "image": image_url,
+                    "pub_date": pub_date
+                })
+                
+            return articles
+            
+        elif response.status_code == 429:
+            # Hit the rate limit. Wait and retry.
+            print(f"Received 429: Too Many Requests. Waiting before retry...")
+            wait_time = random.uniform(3, 7) # <--- ESSENTIAL: Random delay
+            time.sleep(wait_time)
+            
+        else:
+            print(f"Failed to retrieve API data, status code: {response.status_code}")
+            return []
+            
+    # If all retries fail
+    print(f"Failed to retrieve data after {max_retries} attempts.")
+    return []
 
-def generate_rss(articles):
-    """Generates an RSS feed."""
-    fg = FeedGenerator()
-    fg.title("Tom Lisi's Articles - LancasterOnline")
-    fg.link(href=URL, rel="self")
-    fg.description("Latest articles from journalist Tom Lisi on LancasterOnline")
-    fg.language('en') # Best practice to set a language
+# --- Main function to generate the RSS feed (No changes needed below here) ---
+
+def generate_rss_feed(articles):
+    """Generates the RSS feed XML."""
+    fg = feedgen.feed.FeedGenerator()
+    fg.title('Tom Lisi - LancasterOnline')
+    fg.link(href=URL, rel='alternate')
+    fg.description('Latest articles written by Tom Lisi for LNP|LancasterOnline.')
 
     for article in articles:
         fe = fg.add_entry()
-        fe.title(article["title"])
-        fe.link(href=article["link"])
-        fe.description(article["description"])
+        fe.id(article['link'])
+        fe.link(href=article['link'])
+        fe.title(article['title'])
         
-        if article["pub_date"]:
-            try:
-                # pubDate expects a properly formatted string, which you've created
-                fe.pubDate(article["pub_date"])
-            except Exception as e:
-                print(f"Error setting pubDate for {article['title']}: {e}")
+        content = article['description']
+        if article['image']:
+            content = f"<![CDATA[<img src=\"{article['image']}\" />{content}]]>"
         
-        # Only add enclosure if an image URL was successfully found
-        if article["image"]:
-            # NOTE: We assume 'image/jpeg' and size=0 as a placeholder, 
-            # as file size isn't easily known from srcset.
-            fe.enclosure(article["image"], 0, "image/jpeg") 
+        fe.description(content)
+        
+        if article['pub_date']:
+            fe.pubDate(article['pub_date']) 
 
     return fg.rss_str(pretty=True)
 
-def save_rss_feed():
-    """Fetches articles and saves the RSS feed."""
-    articles = fetch_articles()
-    if not articles:
-        print("No articles found. Check selector or URL.")
-        return
-
-    rss_feed = generate_rss(articles)
-
-    with open("tom_lisi_feed.xml", "wb") as f:
-        f.write(rss_feed)
-    
-    print("RSS feed saved as tom_lisi_feed.xml")
-
+# Main execution block
 if __name__ == "__main__":
-    save_rss_feed()
+    articles_data = fetch_articles()
+    
+    if articles_data:
+        rss_output = generate_rss_feed(articles_data)
+        print("\n--- RSS Feed Generated Successfully (Partial Output) ---")
+        print(rss_output[:1000].decode('utf-8'))
+    else:
+        print("\nCould not generate RSS feed. No articles were successfully extracted.")
