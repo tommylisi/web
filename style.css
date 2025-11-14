@@ -82,58 +82,9 @@ body {
 
 }
 
-.rss {
+.feed {
     display: flex;
-    flex-direction: column;
-    background-color: #cbdfc8aa;
-    color: #1a4e30ae;
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: 10px;
-    border: 2px solid #1a4e30ae;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.rss:hover {
-    transform: translateY(-5px);
-}
-.rss h1{
-    display: flex;
-    justify-content: center;
-    background-color: #1a4e30ae;
-    color: rgba(250, 253, 250, 0.926);
-    border-radius: 5;
-    padding: 10px;
-}
-
-.rss a {
-    text-decoration: none;
-    color: inherit;
-}
-
-.rss a:hover {
-    color: rgb(24, 106, 43);
-}
-
-.rss-item {
-    padding: 15px;
-    border-bottom: 1px solid #ddd;
-}
-.rss-title {
-    font-size: 1.5rem;
-}
-.rss-title a {
-    text-decoration: none;
-    color: #333;
-}
-.rss-description {
-    font-size: 1rem;
-    color: #555;
-}
-.rss-date {
-    font-size: 0.85rem;
-    color: #888;
+    padding: 200px;
 }
 
 .contact-form {
