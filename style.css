@@ -83,7 +83,9 @@ body {
 }
 
 .feed {
-    max-width: 200px; 
+    display: flex;
+    margin: 20px auto;
+
 }
 
 .contact-form {
