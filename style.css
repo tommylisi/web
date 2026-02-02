@@ -84,6 +84,7 @@ body {
 
 .feed {
     display: flex;
+    background-color: #1a4e30ae;
     margin: 70px;
 
 }
