@@ -84,8 +84,12 @@ body {
 
 .feed {
     display: flex;
-    background-color: #1a4e30ae;
-    margin: 70px;
+    background-color: #091c11bf;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;    
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
 
 }
 
